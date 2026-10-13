@@ -5,6 +5,7 @@
     "@artepe"
   ],
   "config_flow": true,
+  "dependencies": ["frontend", "panel_custom"],
   "documentation": "https://github.com/artepe/mango-tuya-local-home-assistant",
   "issue_tracker": "https://github.com/artepe/mango-tuya-local-home-assistant/issues",
   "integration_type": "device",
@@ -12,5 +13,5 @@
   "requirements": [
     "tinytuya==1.17.4"
   ],
-  "version": "0.1.0"
+  "version": "0.2.0"
 }

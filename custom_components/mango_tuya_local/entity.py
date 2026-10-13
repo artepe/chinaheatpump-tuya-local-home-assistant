@@ -41,6 +41,8 @@ class MangoParameterEntity(CoordinatorEntity[MangoCoordinator]):
             "parameter_group": self.parameter.group,
             "parameter_slot": self.parameter.slot,
             "parameter_id": self.parameter.id_hex,
+            "description": self.coordinator.descriptions.get(self.parameter.key, {}).get("description"),
+            "description_confidence": self.coordinator.descriptions.get(self.parameter.key, {}).get("confidence"),
             "raw_value": None if field is None else field.value,
             "flags_raw": None if field is None else field.flags,
             "tag_raw": None if field is None else field.tag,

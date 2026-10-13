@@ -2,7 +2,7 @@
 
 DOMAIN = "mango_tuya_local"
 NAME = "Mango Tuya Local"
-VERSION = "0.1.0"
+VERSION = "0.2.0"
 CONF_DEVICE_ID = "device_id"
 CONF_LOCAL_KEY = "local_key"
 CONF_POLL_INTERVAL = "poll_interval"

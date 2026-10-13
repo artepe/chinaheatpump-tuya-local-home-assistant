@@ -1,0 +1,10 @@
+title: Mango Control Room
+views:
+  - title: Pump settings
+    path: pump
+    type: panel
+    icon: mdi:heat-pump-outline
+    cards:
+      - type: custom:mango-parameter-card
+        title: Mango Control Room
+        default_group: 14

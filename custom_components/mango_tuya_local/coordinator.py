@@ -25,6 +25,7 @@ LOGGER = logging.getLogger(__name__)
 class MangoCoordinator(DataUpdateCoordinator[dict[str, Any]]):
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry, profile: Profile, client: MangoClient):
         self.profile, self.client, self.entry = profile, client, entry
+        self.descriptions: dict[str, dict[str, str]] = {}
         self.interval = entry.options.get(CONF_POLL_INTERVAL, DEFAULT_POLL_INTERVAL)
         super().__init__(
             hass,

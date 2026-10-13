@@ -1,6 +1,6 @@
 # Mango Tuya Local
 
-Home Assistant -integraation ensimmainen versio sisaltaa kaikki **770
+Home Assistant -integraation versio 0.2.0 beta sisaltaa kaikki **770
 parametrireittia**, myos kaikki **46 WorkingFreq-kenttaa**. Yhteys on
 paikallinen, Tuya 3.5. Asetusmuutoksia ei tehda kaynnistyksessa tai
 tavallisessa lukemisessa.
@@ -10,6 +10,20 @@ Alarm Sound Set tarjoaa tunnetut Sound On- ja Once 10sec -valinnat.
 Muiden kenttien arvot ovat raaka-arvoja, kunnes yksikot, desimaalit ja
 valintakoodit on varmistettu. Kaikkien kenttien kirjoitusoikeutta ei ole
 vielakaan osoitettu; laite ratkaisee, hyvaksytaanko muutos.
+
+## Dashboard
+
+**Mango Control** ilmestyy sivupalkkiin integraation paivityksen ja HA:n
+uudelleenkaynnistyksen jalkeen. Paivita myos selaimen sivu. Kaikki 770
+parametria ovat 17 kategoriassa, ja jokaisen alla on lyhyt englanninkielinen
+selitys. WorkingFreq:ssa on omat lammitys- ja jaahdytystaulukoiden suodattimet.
+Haku toimii kaikkien kategorioiden yli.
+
+Arvo lahetetaan vasta oman kentan **Apply**-painikkeesta. Nimen perusteella
+paatellyt selitykset on merkitty Inferred; tuntematon toiminto on Unverified.
+Lisaosia tai kasin arvattuja entiteettitunnuksia ei tarvita.
+
+[Dashboardin ohje ja esikatselu](docs/DASHBOARD.md).
 
 ## Asennus
 
@@ -55,7 +69,7 @@ Muutos paivittaa oman osionsa heti. **Refresh all parameters** kaynnistaa
 koko parametrikartan uuden lukemisen. Valitse pidempi lukuvalli asetuksista
 tarvittaessa. Ala muuta samaa kenttaa samaan aikaan toisesta sovelluksesta.
 
-Tama on versio 0.1.0. Parametriprotokolla on testattu valituilla oikean
+Tama on versio 0.2.0 beta. Parametriprotokolla on testattu valituilla oikean
 laitteen kentilla. Home Assistant -osa on testattu HA 2026.10.1:ssa
 simuloidulla yhteydella; sen ensimmainen asennus oikeaan HA:han on viela
 edessa. Kopioitava asennusohjelma sailyttaa aiemman komponentin ennen

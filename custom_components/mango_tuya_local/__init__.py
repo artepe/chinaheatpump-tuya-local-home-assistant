@@ -5,9 +5,15 @@ from homeassistant.const import CONF_HOST, Platform
 from .client import MangoClient
 from .const import CONF_DEVICE_ID, CONF_LOCAL_KEY
 from .coordinator import MangoCoordinator
+from .dashboard import async_setup_dashboard
 from .protocol import Profile
 
 PLATFORMS = [Platform.NUMBER, Platform.SELECT, Platform.SENSOR, Platform.BUTTON]
+
+
+async def async_setup(hass, config):
+    await async_setup_dashboard(hass)
+    return True
 
 
 async def async_setup_entry(hass, entry):
@@ -16,6 +22,7 @@ async def async_setup_entry(hass, entry):
         entry.data[CONF_HOST], entry.data[CONF_DEVICE_ID], entry.data[CONF_LOCAL_KEY], profile
     )
     coordinator = MangoCoordinator(hass, entry, profile, client)
+    coordinator.descriptions = hass.data["mango_tuya_local"]["catalog"]["parameters"]
     entry.runtime_data = coordinator
     try:
         await coordinator.async_config_entry_first_refresh()

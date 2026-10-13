@@ -1,11 +1,21 @@
 # Mango Tuya Local for Home Assistant
 
+[![Tests](https://github.com/artepe/mango-tuya-local-home-assistant/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/artepe/mango-tuya-local-home-assistant/actions/workflows/tests.yml)
+
+**Mango Control Room: 770 parameters, 17 categories, English explanations.**
+
+![Dashboard demo](docs/images/dashboard-desktop.png)
+
+*UI preview with synthetic demo values. The live dashboard uses your HA entities.*
+
+[Dashboard guide](docs/DASHBOARD.md) | [English parameter reference](docs/PARAMETERS.md) | [Releases](https://github.com/artepe/mango-tuya-local-home-assistant/releases)
+
 Local parameter control for the captured Mango Energy Tuya heat-pump profile.
 This initial version exposes **770 parameter routes in 17 sections**, including
 all **46 WorkingFreq fields**. It uses Tuya protocol 3.5 and does not need a
 cloud API account during normal operation.
 
-**Initial release 0.1.0.** The protocol has physical-device evidence for selected
+**Version 0.2.0 beta.** The protocol has physical-device evidence for selected
 routes; the Home Assistant component is tested with a simulated transport.
 The HA component itself still needs its first installation test on the owner
 device. Individual write permissions and most display scales are not yet
@@ -14,6 +24,10 @@ known for every parameter.
 [Suomenkielinen ohje](README_FI.md)
 
 ## Included
+
+- Automatic **Mango Control** sidebar dashboard with all 17 categories.
+- A short English explanation below every field, with inferred functions labelled.
+- Global search, four WorkingFreq table filters, and desktop/mobile layouts.
 
 - 769 number entities and one Alarm Sound Set select: 770 real parameters.
 - 46 WorkingFreq controls, not a single hard-coded test parameter.
@@ -65,6 +79,10 @@ With HACS, add this repository as a custom **Integration** repository,
 download Mango Tuya Local, and restart Home Assistant. Otherwise copy
 `custom_components/mango_tuya_local` to the Home Assistant
 `custom_components` folder and restart.
+
+After updating, **Mango Control** is added to the sidebar automatically.
+Restart Home Assistant and refresh the browser. No additional frontend cards
+or manual entity-ID mapping are needed.
 
 Then go to **Settings > Devices & services > Add integration > Mango Tuya
 Local**. Choose manual credentials (pump IP, device ID, local key), or use

@@ -1,0 +1,42 @@
+name: Release
+on:
+  push:
+    branches: [main]
+    paths:
+      - custom_components/mango_tuya_local/manifest.json
+      - .github/workflows/release.yml
+permissions:
+  contents: read
+concurrency:
+  group: mango-release
+  cancel-in-progress: false
+jobs:
+  validate:
+    uses: ./.github/workflows/tests.yml
+  publish:
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+      - name: Package release
+        run: python tools/package_release.py
+      - name: Publish tested beta
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          MANGO_RELEASE_VERSION="$(python -c 'import json; print(json.load(open("custom_components/mango_tuya_local/manifest.json"))["version"])')"
+          MANGO_RELEASE_TAG="v${MANGO_RELEASE_VERSION}"
+          if gh release view "$MANGO_RELEASE_TAG" >/dev/null 2>&1; then
+            echo "Release $MANGO_RELEASE_TAG already exists; retaining its tag and assets."
+          else
+            gh release create "$MANGO_RELEASE_TAG" release-assets/* \
+              --target "$GITHUB_SHA" --prerelease \
+              --title "$MANGO_RELEASE_TAG - Mango Control Room (beta)" \
+              --notes-file RELEASE_NOTES.md
+          fi
