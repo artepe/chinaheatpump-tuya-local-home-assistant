@@ -1,7 +1,11 @@
 {
   "name": "mango-tuya-local-dashboard-tests",
   "private": true,
-  "version": "0.2.0",
-  "scripts": {"test": "node --test tests/frontend/card.test.cjs"},
-  "devDependencies": {"jsdom": "30.1.2"}
+  "version": "0.2.1",
+  "scripts": {
+    "test": "node --test tests/frontend/card.test.cjs"
+  },
+  "devDependencies": {
+    "jsdom": "30.1.2"
+  }
 }

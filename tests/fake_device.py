@@ -16,12 +16,18 @@ class Hardware:
         self.ignore_target = self.ignore_restore = self.fail_send = False
         self.abort_after_send = None
         self.status_error = False
+        self.status_responses = []
+        self.status_followups = []
+        self.status_calls = 0
+        self.factories = 0
+        self.socket_timeouts = []
         self.private_status = False
         self.hold_read = None
         self.hold_only_after_write = False
 
     def factory(self, *args, **kwargs):
         assert kwargs["version"] == 3.5 and kwargs["persist"] is True
+        self.factories += 1
         return Device(self)
 
 
@@ -31,12 +37,19 @@ class Device:
         self.queue = []
 
     def set_socketTimeout(self, timeout):
-        assert timeout == 1
+        assert timeout in (1, 3)
+        self.hw.socket_timeouts.append(timeout)
 
     def close(self):
         self.hw.closes += 1
 
     def status(self):
+        self.hw.status_calls += 1
+        if self.hw.status_followups:
+            self.queue.extend(self.hw.status_followups)
+            self.hw.status_followups = []
+        if self.hw.status_responses:
+            return self.hw.status_responses.pop(0)
         if self.hw.status_error:
             return {"Error": "PRIVATE_STATUS_PAYLOAD", "Err": "901"}
         return {"dps": {"102": "PRIVATE_VALUE"}} if self.hw.private_status else {"dps": {}}

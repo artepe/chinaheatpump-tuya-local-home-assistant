@@ -76,6 +76,35 @@ class MangoClient:
         self.temperature_received_at = 0.0
         self.verified_writes: set[str] = set()
         self.last_operation: dict[str, Any] | None = None
+        self.last_status_received_at = 0.0
+        self.last_transport_error: str | None = None
+        self.status_reconnects = 0
+
+    def _status_response(self) -> None:
+        """Wait for data after an ACK; never treat an ACK as fresh telemetry."""
+        self._device.set_socketTimeout(3)
+        deadline = self.clock() + 8
+        try:
+            response = self._device.status()
+            for _ in range(8):
+                if isinstance(response, dict):
+                    if "Error" in response or "Err" in response:
+                        code = str(response.get("Err", ""))
+                        safe_code = (
+                            code if len(code) == 3 and code.isascii() and code.isdigit() else "unknown"
+                        )
+                        raise MangoReadError(f"status_error_{safe_code}")
+                    if isinstance(response.get("dps"), dict):
+                        self._record_telemetry(response)
+                        self.last_status_received_at = self.wall_clock()
+                        self.last_transport_error = None
+                        return
+                if self.clock() >= deadline:
+                    break
+                response = self._device.receive()
+            raise MangoReadError("status_data_timeout")
+        finally:
+            self._device.set_socketTimeout(1)
 
     def _record_telemetry(self, message: Any) -> None:
         if isinstance(message, dict) and isinstance(message.get("dps"), dict):
@@ -104,18 +133,13 @@ class MangoClient:
                 connection_timeout=3,
                 connection_retry_limit=1,
             )
-            response = self._device.status()
-            if (
-                not isinstance(response, dict)
-                or "Error" in response
-                or not isinstance(response.get("dps"), dict)
-            ):
-                raise MangoReadError("status_unavailable")
-            self._record_telemetry(response)
-            self._device.set_socketTimeout(1)
-        except Exception:
+            self._status_response()
+        except Exception as error:
+            self.last_transport_error = (
+                str(error) if isinstance(error, MangoReadError) else "status_transport_exception"
+            )
             self._disconnect()
-            raise MangoReadError("local_connection_failed") from None
+            raise MangoReadError(self.last_transport_error) from None
 
     def _disconnect(self) -> None:
         if self._device is not None:
@@ -132,22 +156,22 @@ class MangoClient:
 
     def status(self) -> None:
         with self._lock:
-            if self._device is None:
-                self._connect()
-                return
-            self._connect()
-            try:
-                response = self._device.status()
-                if (
-                    not isinstance(response, dict)
-                    or "Error" in response
-                    or not isinstance(response.get("dps"), dict)
-                ):
-                    raise MangoReadError("status_unavailable")
-                self._record_telemetry(response)
-            except Exception:
-                self._disconnect()
-                raise MangoReadError("local_status_failed") from None
+            for attempt in range(2):
+                try:
+                    if self._device is None:
+                        self._connect()
+                    else:
+                        self._status_response()
+                    return
+                except Exception as error:
+                    self.last_transport_error = (
+                        str(error) if isinstance(error, MangoReadError) else "status_transport_exception"
+                    )
+                    self._disconnect()
+                    if self._closed or attempt == 1:
+                        raise MangoReadError(self.last_transport_error) from None
+                    self.status_reconnects += 1
+                    self.pause(0.2)
 
     def _read_once(self, group: int) -> Snapshot:
         self._connect()

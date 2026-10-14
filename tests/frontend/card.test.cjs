@@ -130,3 +130,22 @@ test("live state refresh preserves a typed draft and never turns missing tempera
     assert.equal(h.card.shadowRoot.querySelector('[data-metric="current_temperature"]').textContent, "\u2014");
   } finally { h.close(); }
 });
+
+test("recovery grace is visibly labelled as last confirmed data", async () => {
+  const h = await create();
+  try {
+    h.hass.states[h.card._device().sensors.parameters_read].attributes.communication_state = "retrying";
+    h.card.hass = h.hass;
+    await new Promise(resolve => h.dom.window.requestAnimationFrame(resolve));
+    const status = h.card.shadowRoot.querySelector('[data-connection]');
+    assert.equal(status.textContent, "Reconnecting / last confirmed values");
+    assert.equal(status.classList.contains("online"), false);
+    assert.equal(h.card.shadowRoot.querySelector('.current-value').textContent.includes("30"), true);
+    assert.equal(h.calls.length, 0);
+    h.hass.states[h.card._device().sensors.parameters_read].attributes.communication_state = "connected";
+    h.card.hass = h.hass;
+    await new Promise(resolve => h.dom.window.requestAnimationFrame(resolve));
+    assert.equal(status.textContent, "Device data available");
+    assert.equal(status.classList.contains("online"), true);
+  } finally { h.close(); }
+});

@@ -1,6 +1,6 @@
 # Mango Tuya Local for Home Assistant
 
-[![Tests](https://github.com/artepe/mango-tuya-local-home-assistant/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/artepe/mango-tuya-local-home-assistant/actions/workflows/tests.yml)
+[![Tests](https://github.com/artepe/chinaheatpump-tuya-local-home-assistant/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/artepe/chinaheatpump-tuya-local-home-assistant/actions/workflows/tests.yml)
 
 **Mango Control Room: 770 parameters, 17 categories, English explanations.**
 
@@ -8,18 +8,17 @@
 
 *UI preview with synthetic demo values. The live dashboard uses your HA entities.*
 
-[Dashboard guide](docs/DASHBOARD.md) | [English parameter reference](docs/PARAMETERS.md) | [Releases](https://github.com/artepe/mango-tuya-local-home-assistant/releases)
+[Dashboard guide](docs/DASHBOARD.md) | [English parameter reference](docs/PARAMETERS.md) | [Releases](https://github.com/artepe/chinaheatpump-tuya-local-home-assistant/releases)
 
 Local parameter control for the captured Mango Energy Tuya heat-pump profile.
 This initial version exposes **770 parameter routes in 17 sections**, including
 all **46 WorkingFreq fields**. It uses Tuya protocol 3.5 and does not need a
 cloud API account during normal operation.
 
-**Version 0.2.0 beta.** The protocol has physical-device evidence for selected
+**Version 0.2.1 beta.** The protocol has physical-device evidence for selected
 routes; the Home Assistant component is tested with a simulated transport.
-The HA component itself still needs its first installation test on the owner
-device. Individual write permissions and most display scales are not yet
-known for every parameter.
+Physical reliability of this update still needs owner validation. Individual
+write permissions and most display scales are not yet known for every parameter.
 
 [Suomenkielinen ohje](README_FI.md)
 
@@ -106,6 +105,22 @@ writes. Choose **Use credentials exported from the Pi session** in the UI.
 Successful setup removes the temporary file. Credentials are not in this
 repository or its tests. The installer preserves an existing component
 outside `custom_components` before replacing it.
+
+## Connection recovery (0.2.1)
+
+A status request waits for data after an ACK and uses a three-second socket
+timeout instead of the old one-second timeout. A failed status request retries
+once on a fresh local connection. After both attempts fail, previously confirmed
+values are retained for a bounded recovery window: `min(120, poll_interval * 3 + 10)`
+seconds since the last confirmed contact (100 seconds at the default 30-second
+poll interval). The dashboard labels this state **Reconnecting / last confirmed
+values**. Missing/stale temperatures are still unavailable; failure does not
+refresh their timestamps. A sustained outage makes the entities unavailable.
+
+Failed parameter groups are retried on the next normal poll, once, before the
+round-robin scan continues. Diagnostics include a redacted transport error code,
+retry count and communication state. No credentials or raw status payloads are
+logged. Parameter write/readback/recovery validation remains enforced.
 
 ## Refresh and writes
 

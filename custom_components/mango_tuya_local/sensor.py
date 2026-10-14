@@ -41,7 +41,7 @@ class MangoSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def available(self):
-        if not self.coordinator.last_update_success:
+        if not self.coordinator.last_update_success or self.coordinator.connection_state == "offline":
             return False
         if self.key == "parameters_read":
             return True
@@ -50,6 +50,15 @@ class MangoSensor(CoordinatorEntity, SensorEntity):
             self.key in data["temperatures"]
             and time.time() - data["temperature_received_at"] <= self.coordinator.interval * 3 + 10
         )
+
+    @property
+    def extra_state_attributes(self):
+        return {
+            "communication_state": self.coordinator.connection_state,
+            "data_received_at": None
+            if self.key == "parameters_read"
+            else self.coordinator.data["temperature_received_at"],
+        }
 
     @property
     def native_value(self):

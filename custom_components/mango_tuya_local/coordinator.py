@@ -39,6 +39,10 @@ class MangoCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self.failed_groups: set[int] = set()
         self._io_lock = asyncio.Lock()
         self._next_group = 0
+        self._retry_group: int | None = None
+        self._last_contact_monotonic: float | None = None
+        self.connection_state = "connecting"
+        self.consecutive_status_failures = 0
         self._scan_task: asyncio.Task | None = None
         self._closing = False
 
@@ -48,7 +52,18 @@ class MangoCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             "failed_groups": frozenset(self.failed_groups),
             "temperatures": dict(self.client.temperatures),
             "temperature_received_at": self.client.temperature_received_at,
+            "connection_state": self.connection_state,
+            "consecutive_status_failures": self.consecutive_status_failures,
         }
+
+    @property
+    def connection_grace_seconds(self) -> int:
+        return min(120, self.interval * 3 + 10)
+
+    def _mark_contact(self) -> None:
+        self._last_contact_monotonic = time.monotonic()
+        self.connection_state = "connected"
+        self.consecutive_status_failures = 0
 
     async def _executor(self, method, *args, abort: threading.Event | None = None):
         return await async_call(self.hass, method, *args, abort=abort)
@@ -60,16 +75,35 @@ class MangoCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             try:
                 await self._executor(self.client.status)
             except MangoError as error:
-                raise UpdateFailed("Local device connection failed") from error
+                self.consecutive_status_failures += 1
+                self.connection_state = "retrying"
+                if (
+                    self.snapshots
+                    and self._last_contact_monotonic is not None
+                    and time.monotonic() - self._last_contact_monotonic <= self.connection_grace_seconds
+                ):
+                    LOGGER.debug("Mango status retry pending (%s)", self.client.last_transport_error)
+                    return self.current_data()
+                self.connection_state = "offline"
+                raise UpdateFailed(
+                    f"Local device connection failed ({self.client.last_transport_error or 'read_failed'})"
+                ) from error
+            self._mark_contact()
             # During initial full scan, the background worker supplies metadata.
             if self._scan_task is None or self._scan_task.done():
-                group = self._next_group
-                self._next_group = (group + 1) % 17
+                retry = self._retry_group is not None
+                if retry:
+                    group, self._retry_group = self._retry_group, None
+                else:
+                    group = self._next_group
+                    self._next_group = (group + 1) % 17
                 try:
                     self.snapshots[group] = await self._executor(self.client.read_group, group)
                     self.failed_groups.discard(group)
                 except MangoError as error:
                     self.failed_groups.add(group)
+                    if not retry:
+                        self._retry_group = group
                     if not self.snapshots:
                         raise UpdateFailed("Matching Mango parameter descriptions unavailable") from error
             return self.current_data()
@@ -79,7 +113,11 @@ class MangoCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         return snapshot.field(parameter) if snapshot is not None else None
 
     def parameter_available(self, parameter: Parameter) -> bool:
-        if not self.last_update_success or parameter.group in self.failed_groups:
+        if (
+            not self.last_update_success
+            or self.connection_state == "offline"
+            or parameter.group in self.failed_groups
+        ):
             return False
         snapshot = self.snapshots.get(parameter.group)
         if snapshot is None or time.time() - snapshot.received_at > self.interval * 34 + 60:
@@ -102,6 +140,7 @@ class MangoCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 # A cancelled caller has no returned snapshot, even if recovery
                 # finished. Do not show an old cached value as confirmed current.
                 self.failed_groups.add(parameter.group)
+                self._retry_group = parameter.group
                 self.async_set_updated_data(self.current_data())
                 raise
             except MangoValueError as error:
@@ -110,8 +149,10 @@ class MangoCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 if error.snapshot is not None:
                     self.snapshots[parameter.group] = error.snapshot
                     self.failed_groups.discard(parameter.group)
+                    self._mark_contact()
                 else:
                     self.failed_groups.add(parameter.group)
+                    self._retry_group = parameter.group
                 self.async_set_updated_data(self.current_data())
                 if error.restored:
                     raise HomeAssistantError(
@@ -122,12 +163,14 @@ class MangoCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 ) from error
             except MangoError as error:
                 self.failed_groups.add(parameter.group)
+                self._retry_group = parameter.group
                 self.async_set_updated_data(self.current_data())
                 raise HomeAssistantError(
                     "Matching parameter reply unavailable; no confirmed change"
                 ) from error
             self.snapshots[parameter.group] = result.snapshot
             self.failed_groups.discard(parameter.group)
+            self._mark_contact()
             self.async_set_updated_data(self.current_data())
 
     def async_start_scan(self) -> None:
@@ -145,8 +188,11 @@ class MangoCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 try:
                     self.snapshots[group] = await self._executor(self.client.read_group, group)
                     self.failed_groups.discard(group)
+                    self._mark_contact()
                 except MangoError:
                     self.failed_groups.add(group)
+                    if self._retry_group is None:
+                        self._retry_group = group
                     LOGGER.debug(
                         "Mango parameter group %s did not return complete matching descriptions", group
                     )

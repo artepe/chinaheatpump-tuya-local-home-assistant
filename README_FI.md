@@ -1,6 +1,6 @@
 # Mango Tuya Local
 
-Home Assistant -integraation versio 0.2.0 beta sisaltaa kaikki **770
+Home Assistant -integraation versio 0.2.1 beta sisaltaa kaikki **770
 parametrireittia**, myos kaikki **46 WorkingFreq-kenttaa**. Yhteys on
 paikallinen, Tuya 3.5. Asetusmuutoksia ei tehda kaynnistyksessa tai
 tavallisessa lukemisessa.
@@ -69,10 +69,20 @@ Muutos paivittaa oman osionsa heti. **Refresh all parameters** kaynnistaa
 koko parametrikartan uuden lukemisen. Valitse pidempi lukuvalli asetuksista
 tarvittaessa. Ala muuta samaa kenttaa samaan aikaan toisesta sovelluksesta.
 
-Tama on versio 0.2.0 beta. Parametriprotokolla on testattu valituilla oikean
+Tama on versio 0.2.1 beta. Parametriprotokolla on testattu valituilla oikean
 laitteen kentilla. Home Assistant -osa on testattu HA 2026.10.1:ssa
-simuloidulla yhteydella; sen ensimmainen asennus oikeaan HA:han on viela
-edessa. Kopioitava asennusohjelma sailyttaa aiemman komponentin ennen
+simuloidulla yhteydella; taman paivityksen toimivuus oikeassa HA:ssa on viela
+varmistettava. Kopioitava asennusohjelma sailyttaa aiemman komponentin ennen
 paivitysta, eika kaynnista HA:ta itsestaan uudestaan.
 
 Tarkemmat tiedot ja vahvistuksen rajat: [README.md](README.md).
+
+## Yhteyskorjaus 0.2.1
+
+Tilakysely odottaa varsinaista dataa kuittauksen jalkeen ja kayttaa kolmen
+sekunnin vastausaikaa. Epaonnistunut kysely yritetaan kerran uudella yhteydella.
+Lyhyessa katkossa viimeiset vahvistetut arvot sailyvat enintaan
+`min(120, lukuvalli * 3 + 10)` sekuntia viimeisesta yhteydesta.
+Dashboard kertoo Reconnecting / last confirmed values. Pitka katkos ja
+vanhentuneet lampotilat naytetaan edelleen unavailable-tilassa.
+Epaonnistunutta parametriryhmaa yritetaan uudelleen seuraavalla lukukierroksella.

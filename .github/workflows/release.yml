@@ -37,6 +37,6 @@ jobs:
           else
             gh release create "$MANGO_RELEASE_TAG" release-assets/* \
               --target "$GITHUB_SHA" --prerelease \
-              --title "$MANGO_RELEASE_TAG - Mango Control Room (beta)" \
+              --title "$MANGO_RELEASE_TAG - Mango Tuya Local (beta)" \
               --notes-file RELEASE_NOTES.md
           fi

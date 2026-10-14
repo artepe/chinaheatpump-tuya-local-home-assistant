@@ -256,7 +256,11 @@
         if (element) element.textContent = available(state) ? `${state.state} ${state.attributes.unit_of_measurement || ""}`.trim() : "\u2014";
       }
       const connection = this.shadowRoot.querySelector("[data-connection]");
-      if (connection) { connection.textContent = count ? "Device data available" : "Waiting for device data"; connection.classList.toggle("online", count > 0); }
+      const communication = this._hass.states[device.sensors.parameters_read]?.attributes.communication_state;
+      if (connection) {
+        connection.textContent = communication === "retrying" ? "Reconnecting / last confirmed values" : communication === "offline" ? "Device connection unavailable" : count ? "Device data available" : "Waiting for device data";
+        connection.classList.toggle("online", count > 0 && communication !== "retrying" && communication !== "offline");
+      }
       const refresh = this.shadowRoot.querySelector('[data-action="refresh"]');
       if (refresh) refresh.disabled = !device.refresh_entity || !this._hass.states[device.refresh_entity] || this._hass.states[device.refresh_entity].state === "unavailable";
       const byKey = new Map(all.map(p => [p.key, p]));
@@ -286,7 +290,7 @@
       header{padding:30px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;background:radial-gradient(ellipse at 88% 0%,#204c4840,transparent 65%),#101b23;border-bottom:1px solid var(--m-line)}
       .identity{display:flex;align-items:center;gap:17px}.brand-mark{display:grid;place-items:center;width:50px;height:54px;flex-shrink:0;border:1px solid #65dcc660;border-radius:15px;color:var(--m-accent);background:#65dcc60c;font-size:30px;font-weight:800;letter-spacing:-3px;padding-right:3px}
       .eyebrow{font-size:10px;font-weight:700;letter-spacing:1.9px;color:var(--m-accent)}h1{font-size:26px;line-height:1.25;font-weight:650;letter-spacing:-.7px;margin:5px 0 7px}.subtitle{display:flex;gap:9px;align-items:center;font-size:12px;color:var(--m-muted)}.separator{opacity:.35}
-      .header-actions{display:flex;align-items:center;gap:15px}.connection{font-size:11px;color:var(--m-muted);white-space:nowrap}.connection::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:#9aa6b1;margin-right:7px}.connection.online::before{background:var(--m-accent);box-shadow:0 0 12px #65dcc670}
+      .header-actions{display:flex;align-items:center;gap:15px}.connection{font-size:11px;color:var(--m-muted);white-space:normal;flex:1;min-width:0}.connection::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:#9aa6b1;margin-right:7px}.connection.online::before{background:var(--m-accent);box-shadow:0 0 12px #65dcc670}
       button,input,select{font:inherit;color:inherit}button{cursor:pointer;touch-action:manipulation}button:disabled{opacity:.4;cursor:default}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--m-accent);outline-offset:3px}ha-icon{--mdc-icon-size:19px;display:inline-flex;width:19px;height:19px;flex-shrink:0;vertical-align:middle}
       .refresh{display:flex;align-items:center;gap:9px;min-height:42px;border:1px solid #65dcc650;border-radius:10px;background:#65dcc611;padding:10px 14px;color:var(--m-accent);font-size:12px;font-weight:600;white-space:nowrap}.icon-button{border:0;background:none;padding:7px;color:var(--m-muted);border-radius:8px;min-width:34px;min-height:34px;display:grid;place-items:center}.icon-button:hover{background:#ffffff09}
       .metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:25px 32px;gap:26px;border-bottom:1px solid var(--m-line)}.metric{position:relative;padding-right:20px;min-width:0}.metric:not(:last-child){border-right:1px solid var(--m-line)}.metric-label{font-size:10px;font-weight:600;letter-spacing:1.4px;color:var(--m-muted)}.metric strong{display:block;font-size:30px;font-weight:600;letter-spacing:-1px;margin-top:10px;line-height:1.25}.metric small{font-size:16px;letter-spacing:0;color:var(--m-muted);font-weight:400}.metric p{font-size:11px;line-height:1.55;color:var(--m-muted);margin:9px 0 0;max-width:320px}.track{height:3px;border-radius:3px;background:var(--m-line);margin-top:13px;max-width:280px}.progress{height:100%;background:var(--m-accent);transition:width .2s;border-radius:3px}
