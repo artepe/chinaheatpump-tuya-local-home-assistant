@@ -1,3 +1,7 @@
+> **Huom:** 770 raakareitin dokumentointi ei tarkoita, että kaikkien parametrien
+> fyysinen merkitys tai asteikko olisi vahvistettu. Automaattista AI-kirjoittamista
+> varten katso [turvallisuus- ja varmennusohje](docs/AI_SAFETY.md).
+
 # Mango Tuya Local
 
 Home Assistant -integraation versio 0.2.1 beta sisaltaa kaikki **770
