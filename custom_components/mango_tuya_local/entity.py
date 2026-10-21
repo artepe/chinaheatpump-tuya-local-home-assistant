@@ -53,6 +53,11 @@ class MangoParameterEntity(CoordinatorEntity[MangoCoordinator]):
             "flags_raw": None if field is None else field.flags,
             "tag_raw": None if field is None else field.tag,
             "scale_verified": self.parameter.scale_verified,
+            # A confirmed raw write is not evidence that the physical meaning or
+            # engineering unit is correct. External optimizers must explicitly
+            # whitelist verified parameters before unattended control.
+            "ai_write_mapping_verified": False,  # requires independent physical commissioning
+            "ai_requires_owner_approval": True,
             "local_write_evidence": "verified_this_connection"
             if self.parameter.key in self.coordinator.client.verified_writes
             else self.parameter.local_write_evidence,
