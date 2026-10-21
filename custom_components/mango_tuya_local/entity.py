@@ -56,8 +56,8 @@ class MangoParameterEntity(CoordinatorEntity[MangoCoordinator]):
             # A confirmed raw write is not evidence that the physical meaning or
             # engineering unit is correct. External optimizers must explicitly
             # whitelist verified parameters before unattended control.
-            "ai_write_mapping_verified": self.parameter.scale_verified,
-            "ai_requires_owner_approval": not self.parameter.scale_verified,
+            "ai_write_mapping_verified": False,  # requires independent physical commissioning
+            "ai_requires_owner_approval": True,
             "local_write_evidence": "verified_this_connection"
             if self.parameter.key in self.coordinator.client.verified_writes
             else self.parameter.local_write_evidence,
