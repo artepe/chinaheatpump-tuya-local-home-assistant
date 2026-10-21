@@ -299,7 +299,7 @@ class MangoClient:
                             )
                             restored = True
                             break
-                        except Exception, KeyboardInterrupt:
+                        except (Exception, KeyboardInterrupt):
                             pass
                 operation["restore_verified"] = restored
                 operation["failure_code"] = (
