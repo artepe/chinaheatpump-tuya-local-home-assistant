@@ -6,6 +6,6 @@
     "test": "node --test tests/frontend/card.test.cjs"
   },
   "devDependencies": {
-    "jsdom": "30.1.2"
+    "jsdom": "30.1.3"
   }
 }
