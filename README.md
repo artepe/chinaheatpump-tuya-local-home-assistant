@@ -22,6 +22,15 @@ write permissions and most display scales are not yet known for every parameter.
 
 [Suomenkielinen ohje](README_FI.md)
 
+## Experimental Modbus + AI monitor
+
+This branch adds an **optional, separate, read-only** `mango_modbus_monitor` integration.
+It consumes existing HA Modbus sensor entities and exposes diagnostic metrics for Home
+Assistant's `ai_task.generate_data`. It does not change the Mango Tuya component or
+write to the heat pump.
+
+See [installation and mapping instructions](docs/MODBUS_AI_MONITOR.md).
+
 ## Included
 
 - Automatic **Mango Control** sidebar dashboard with all 17 categories.
