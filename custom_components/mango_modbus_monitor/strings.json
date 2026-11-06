@@ -1,0 +1,46 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Mango Modbus Monitor",
+        "description": "Select existing Home Assistant entities. This integration never writes to Modbus or the heat pump.",
+        "data": {
+          "name": "Monitor name",
+          "compressor_rps": "Compressor RPS",
+          "outdoor_temperature": "Outdoor temperature",
+          "supply_temperature": "Water supply temperature",
+          "return_temperature": "Water return temperature",
+          "flow_rate": "Water flow",
+          "electric_power": "Electrical input power",
+          "thermal_power": "Measured thermal output",
+          "reported_cop": "Existing COP sensor",
+          "superheat": "Suction superheat",
+          "eev_position": "EEV position",
+          "heat_setpoint": "Heating setpoint from Mango Tuya",
+          "defrost": "Defrost active"
+        }
+      },
+      "reconfigure": {
+        "title": "Edit Modbus entity mappings",
+        "description": "Replace the selected entity mappings.",
+        "data": {
+          "name": "Monitor name",
+          "compressor_rps": "Compressor RPS",
+          "outdoor_temperature": "Outdoor temperature",
+          "supply_temperature": "Water supply temperature",
+          "return_temperature": "Water return temperature",
+          "flow_rate": "Water flow",
+          "electric_power": "Electrical input power",
+          "thermal_power": "Measured thermal output",
+          "reported_cop": "Existing COP sensor",
+          "superheat": "Suction superheat",
+          "eev_position": "EEV position",
+          "heat_setpoint": "Heating setpoint from Mango Tuya",
+          "defrost": "Defrost active"
+        }
+      }
+    },
+    "error": {"missing_sensor": "Select at least one sensor."},
+    "abort": {"already_configured": "Monitor is already configured.", "reconfigure_successful": "Mappings updated."}
+  }
+}
