@@ -1,0 +1,34 @@
+# Paste as ONE entry in automations.yaml. Requires a configured AI Task entity.
+# Check the actual generated sensor entity ID in Developer Tools > States.
+- id: mango_ai_monitor_analysis
+  alias: "Mango AI Monitor | Analyze anomalies"
+  description: "Read-only AI diagnosis. Never changes heat-pump parameters."
+  triggers:
+    - trigger: time_pattern
+      minutes: "/30"
+  conditions:
+    - condition: state
+      entity_id: sensor.mango_modbus_monitor_status
+      state: "warning"
+  actions:
+    - action: ai_task.generate_data
+      data:
+        task_name: "Mango heat-pump diagnostic"
+        instructions: >-
+          You are reviewing unverified heat-pump telemetry.
+          Status: {{ states('sensor.mango_modbus_monitor_status') }}.
+          Issues: {{ state_attr('sensor.mango_modbus_monitor_status', 'issues') | to_json }}.
+          Measurements: {{ state_attr('sensor.mango_modbus_monitor_status', 'readings') | to_json }}.
+          Units: {{ state_attr('sensor.mango_modbus_monitor_status', 'units') | to_json }}.
+          Derived values: {{ state_attr('sensor.mango_modbus_monitor_status', 'metrics') | to_json }}.
+          Explain likely measurement or scaling errors, and suggest safe
+          DIAGNOSTIC checks in Finnish. Distinguish confirmed measurements
+          from hypotheses. Do not instruct bypassing safety controls.
+          Never issue commands to change compressor speed, EEV, protections
+          or defrost settings. Keep it short.
+      response_variable: mango_analysis
+    - action: persistent_notification.create
+      data:
+        title: "Mango AI Monitor"
+        message: "{{ mango_analysis.data }}"
+  mode: single
