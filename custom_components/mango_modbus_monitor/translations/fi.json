@@ -1,0 +1,51 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Mango Modbus -valvonta",
+        "description": "Valitse olemassa olevat Home Assistant -anturit. Integraatio ei kirjoita Modbusiin eikä lämpöpumppuun.",
+        "data": {
+          "name": "Valvonnan nimi",
+          "compressor_rps": "Kompressorin kierrokset (RPS)",
+          "outdoor_temperature": "Ulkolämpötila",
+          "supply_temperature": "Menoveden lämpötila",
+          "return_temperature": "Paluuveden lämpötila",
+          "flow_rate": "Vesivirta",
+          "electric_power": "Sähköteho",
+          "thermal_power": "Lämpöteho",
+          "reported_cop": "Nykyinen COP-anturi",
+          "superheat": "Imukaasun tulistus",
+          "eev_position": "EEV-venttiilin asento",
+          "heat_setpoint": "Lämmityksen asetusarvo Mango Tuyasta",
+          "defrost": "Sulatus käynnissä (binary_sensor)"
+        }
+      },
+      "reconfigure": {
+        "title": "Muokkaa Modbus-antureita",
+        "description": "Valitse anturit uudelleen.",
+        "data": {
+          "name": "Valvonnan nimi",
+          "compressor_rps": "Kompressorin kierrokset (RPS)",
+          "outdoor_temperature": "Ulkolämpötila",
+          "supply_temperature": "Menoveden lämpötila",
+          "return_temperature": "Paluuveden lämpötila",
+          "flow_rate": "Vesivirta",
+          "electric_power": "Sähköteho",
+          "thermal_power": "Lämpöteho",
+          "reported_cop": "Nykyinen COP-anturi",
+          "superheat": "Imukaasun tulistus",
+          "eev_position": "EEV-venttiilin asento",
+          "heat_setpoint": "Lämmityksen asetusarvo Mango Tuyasta",
+          "defrost": "Sulatus käynnissä (binary_sensor)"
+        }
+      }
+    },
+    "error": {
+      "missing_sensor": "Valitse vähintään yksi anturi."
+    },
+    "abort": {
+      "already_configured": "Valvonta on jo määritetty.",
+      "reconfigure_successful": "Anturivalinnat päivitetty."
+    }
+  }
+}
