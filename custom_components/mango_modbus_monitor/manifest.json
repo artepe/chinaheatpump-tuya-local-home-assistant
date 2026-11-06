@@ -1,0 +1,11 @@
+{
+  "domain": "mango_modbus_monitor",
+  "name": "Mango Modbus Monitor",
+  "version": "0.1.0",
+  "config_flow": true,
+  "integration_type": "service",
+  "iot_class": "local_polling",
+  "requirements": [],
+  "documentation": "https://github.com/artepe/chinaheatpump-tuya-local-home-assistant/blob/feature/modbus-ai-monitor/docs/MODBUS_AI_MONITOR.md",
+  "codeowners": ["@artepe"]
+}
