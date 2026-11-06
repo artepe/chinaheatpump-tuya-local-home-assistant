@@ -55,7 +55,7 @@ class MangoModbusCoordinator(DataUpdateCoordinator):
         report["entity_ids"] = entity_ids
         report["unavailable"] = missing
         if not readings:
-            report["status"] = "unavailable"
+            report["status"] = "no_data"
         elif missing and report["status"] == "ok":
             report["status"] = "incomplete"
         return report
