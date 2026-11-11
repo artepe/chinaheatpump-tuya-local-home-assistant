@@ -57,10 +57,11 @@ async def test_options_change_reloads_with_one_new_client(hass, mocked_client):
     entry = await setup(hass, mocked_client)
     result = await hass.config_entries.options.async_init(entry.entry_id)
     assert result["step_id"] == "init"
-    result = await hass.config_entries.options.async_configure(result["flow_id"], {"poll_interval": 60})
+    result = await hass.config_entries.options.async_configure(result["flow_id"], {"poll_interval": 60, "allow_writes": True})
     assert result["type"] == "create_entry"
     await hass.async_block_till_done(wait_background_tasks=True)
     assert entry.runtime_data.interval == 60
+    assert entry.runtime_data.writes_enabled
     assert mocked_client[0]._closed
 
 
