@@ -43,6 +43,7 @@ async def test_dashboard_uses_actual_registry_ids_and_describes_all_controls(has
     assert len(rows) == 770 and len(pump["groups"][14]["parameters"]) == 46
     assert all(p["entity_id"] in hass.states.async_entity_ids() and p["description"] for p in rows)
     assert sum(p["domain"] == "select" for p in rows) == 1
+    assert all(not p["can_control"] for p in rows)  # Read-only by default
     assert all(pump["sensors"].values()) and pump["refresh_entity"]
     encoded = json.dumps(data)
     assert (

@@ -15,8 +15,11 @@ from custom_components.mango_tuya_local.diagnostics import async_get_config_entr
 DATA = {"host": "127.0.0.1", "device_id": "TEST_DEVICE", "local_key": "0000000000000000"}
 
 
-async def setup(hass, mocked_client):
-    entry = MockConfigEntry(domain=DOMAIN, unique_id="TEST_DEVICE", title="Mango test", data=DATA)
+async def setup(hass, mocked_client, *, allow_writes=False):
+    entry = MockConfigEntry(
+        domain=DOMAIN, unique_id="TEST_DEVICE", title="Mango test",
+        data=DATA, options={"allow_writes": allow_writes},
+    )
     entry.add_to_hass(hass)
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done(wait_background_tasks=True)
@@ -44,7 +47,7 @@ async def test_real_ha_setup_registers_all_770_parameters_and_46_workingfreq(has
 
 
 async def test_number_service_writes_only_selected_workingfreq_field(hass, mocked_client, hardware):
-    await setup(hass, mocked_client)
+    await setup(hass, mocked_client, allow_writes=True)
     target = entity_id(hass, "number", "0x06BF")
     assert hass.states.get(target).state == "30.0"
     await hass.services.async_call("number", "set_value", {"entity_id": target, "value": 31}, blocking=True)
@@ -53,7 +56,7 @@ async def test_number_service_writes_only_selected_workingfreq_field(hass, mocke
 
 
 async def test_confirmed_decimal_scale_and_reject_fractional_raw_step(hass, mocked_client, hardware):
-    await setup(hass, mocked_client)
+    await setup(hass, mocked_client, allow_writes=True)
     target = entity_id(hass, "number", "0x03A1")
     state = hass.states.get(target)
     assert state.state == "0.1" and state.attributes["step"] == 0.1
@@ -67,7 +70,7 @@ async def test_confirmed_decimal_scale_and_reject_fractional_raw_step(hass, mock
 
 
 async def test_alarm_select_known_labels_and_raw_unmapped_codes(hass, mocked_client, hardware):
-    await setup(hass, mocked_client)
+    await setup(hass, mocked_client, allow_writes=True)
     target = entity_id(hass, "select", "0x037B")
     state = hass.states.get(target)
     assert state.state == "Once 10sec"
@@ -79,7 +82,7 @@ async def test_alarm_select_known_labels_and_raw_unmapped_codes(hass, mocked_cli
 
 
 async def test_failed_write_restores_state_and_reports_error(hass, mocked_client, hardware):
-    entry = await setup(hass, mocked_client)
+    entry = await setup(hass, mocked_client, allow_writes=True)
     target = entity_id(hass, "number", "0x06BF")
     start = hardware.reads
     hardware.plans = {start + 2: "missing", start + 3: "missing"}
@@ -140,7 +143,7 @@ async def test_raw_non_integer_and_out_of_range_service_never_write(hass, mocked
 async def test_cancelled_ha_write_keeps_lock_until_rollback_and_marks_group_unknown(
     hass, mocked_client, hardware
 ):
-    entry = await setup(hass, mocked_client)
+    entry = await setup(hass, mocked_client, allow_writes=True)
     coordinator = entry.runtime_data
     started, release = threading.Event(), threading.Event()
     hardware.hold_read = started, release
@@ -157,3 +160,18 @@ async def test_cancelled_ha_write_keeps_lock_until_rollback_and_marks_group_unkn
     assert coordinator.client.last_operation["restore_verified"]
     assert 14 in coordinator.failed_groups
     assert hass.states.get(entity_id(hass, "number", "0x06BF")).state == "unavailable"
+
+async def test_write_permission_defaults_off_and_denies_coordinator_calls(hass, mocked_client, hardware):
+    entry = await setup(hass, mocked_client)
+    assert not entry.runtime_data.writes_enabled
+    with pytest.raises(HomeAssistantError, match="writes are disabled"):
+        await entry.runtime_data.async_set_raw(entry.runtime_data.profile.parameter(14, 16), 31)
+    assert hardware.writes == 0
+
+
+async def test_write_permission_allows_only_when_explicitly_enabled(hass, mocked_client, hardware):
+    entry = await setup(hass, mocked_client, allow_writes=True)
+    assert entry.runtime_data.writes_enabled
+    await entry.runtime_data.async_set_raw(entry.runtime_data.profile.parameter(14, 16), 31)
+    assert hardware.values["14:16"] == 31
+    assert hardware.writes == 1
