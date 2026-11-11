@@ -15,7 +15,7 @@ This initial version exposes **770 parameter routes in 17 sections**, including
 all **46 WorkingFreq fields**. It uses Tuya protocol 3.5 and does not need a
 cloud API account during normal operation.
 
-**Version 0.2.1 beta.** The protocol has physical-device evidence for selected
+**Version 0.2.2 beta.** The protocol has physical-device evidence for selected
 routes; the Home Assistant component is tested with a simulated transport.
 Physical reliability of this update still needs owner validation. Individual
 write permissions and most display scales are not yet known for every parameter.
@@ -40,7 +40,7 @@ write permissions and most display scales are not yet known for every parameter.
 - UI configuration, polling options, connection reconfiguration, and
   credential-redacted diagnostics.
 
-There are 774 entities in total: 770 controls, three sensors and one button.
+There are 774 entities in total: 770 parameter entities, three sensors and one button.
 The 34 repeated `bak` rows in SYS Para 2 are not entities or write targets.
 First setup reads parameters in the background. Fields remain unavailable
 until their matching complete group has been received. Initial setup and
@@ -123,6 +123,10 @@ retry count and communication state. No credentials or raw status payloads are
 logged. Parameter write/readback/recovery validation remains enforced.
 
 ## Refresh and writes
+
+**All parameter writes are disabled by default**, while read-only monitoring remains available.
+To allow parameter changes, open **Settings → Devices & services → Mango Tuya Local → Configure**, enable **Enable parameter writes**, and save. The integration reloads and then permits explicitly requested commands through its validated local write/readback path. You can turn permission OFF in the same place. The dashboard does not offer editable controls while writes are disabled, and the coordinator rejects writes even if a service call bypasses the dashboard. Physical safety limits, vendor protections and fresh bounds still apply. This toggle does **not** certify that all 770 routes are safe or writable. Back up existing settings before enabling it.
+
 
 Default polling is 30 seconds: status plus one parameter group. A complete
 initial scan is performed once in the background. Use **Refresh all
