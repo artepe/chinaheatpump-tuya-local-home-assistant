@@ -86,3 +86,7 @@ Lyhyessa katkossa viimeiset vahvistetut arvot sailyvat enintaan
 Dashboard kertoo Reconnecting / last confirmed values. Pitka katkos ja
 vanhentuneet lampotilat naytetaan edelleen unavailable-tilassa.
 Epaonnistunutta parametriryhmaa yritetaan uudelleen seuraavalla lukukierroksella.
+
+## Kirjoitusoikeus
+
+Parametrien kirjoitukset ovat oletuksena pois kaytosta, mutta mittaukset ja luku toimivat. Avaa Home Assistantissa **Asetukset → Laitteet ja palvelut → Mango Tuya Local → Maarita**, kytke **Salli asetusarvojen kirjoitukset** paalle ja tallenna. Kirjoitus tapahtuu vain erillisella kayttajakomennolla, ja aiemmat rajat, kuittaus ja palautusyritys sailyvat. Asetuksen voi kytkea takaisin pois samasta paikasta. Ohjaimesta riippuen kaikkia 770 parametria ei ole varmennettu turvallisiksi muutoksille. Ota laitteesta asetusten varmuuskopio ennen testaamista.
